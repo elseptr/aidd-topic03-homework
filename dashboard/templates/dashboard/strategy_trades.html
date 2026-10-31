@@ -1,0 +1,17 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+<h3>Журнал: {{ strategy.name }}</h3>
+<p>Сделок: {{ perf.trades_count }} · Инвестировано: {{ perf.invested|floatformat:2 }} ·
+   Возврат: {{ perf.returned|floatformat:2 }} · P&L: <b>{{ perf.pnl|floatformat:2 }}</b></p>
+<table class="table table-sm">
+  <tr><th>Время</th><th>Сторона</th><th>Кол-во</th><th>Цена</th><th>Сумма</th><th>Заметка</th></tr>
+  {% for t in trades %}
+  <tr>
+    <td>{{ t.executed_at }}</td><td>{{ t.get_side_display }}</td>
+    <td>{{ t.quantity }}</td><td>{{ t.price|floatformat:2 }}</td>
+    <td>{{ t.total|floatformat:2 }}</td><td>{{ t.note }}</td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="{% url 'dashboard:strategy_list' %}">← назад</a>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "dashboard/base.html" %}
+{% block title %}<title>Портфели</title>{% endblock %}
+{% block content %}
+<h2>Виртуальные портфели</h2>
+{% for p, s in portfolios %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5><a href="{% url 'dashboard:portfolio_detail' p.id %}">{{ p.name }}</a></h5>
+    <p>Кэш: {{ s.cash|floatformat:2 }} · Позиции: {{ s.positions_value|floatformat:2 }} ·
+       Итого: <b>{{ s.total_value|floatformat:2 }}</b> · P&L: {{ s.total_pnl|floatformat:2 }}</p>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

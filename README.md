@@ -1,23 +1,54 @@
-# investing
+# Investing Demo
 
-# PostgreSQL (Docker)
-docker-compose -f docker-compose.yml up
+Django-приложение для просмотра списка акций, работы с REST API и виртуального инвестирования.
 
-# Tinkoff Invest API
-# TINKOFF_TOKEN указывается в config/settings.py
+## Возможности
 
-# Первоначальная загрузка списка акций
-python manage.py add_shares
+- Каталог акций, карточка инструмента и REST API `/api/v1/shares/`.
+- Регистрация и авторизация.
+- Персональные списки наблюдения, целевые уровни и уведомления.
+- Виртуальные портфели: покупки/продажи, средняя цена, текущая стоимость и P&L.
+- История цен в БД, выбор периода и график по накопленным наблюдениям.
+- Симулятор пороговых стратегий и журнал виртуальных сделок.
 
-# Celery Beat
-celery -A config beat
+Все операции портфеля и стратегии виртуальные: приложение не отправляет торговые поручения брокеру.
 
-# Celery Worker
+## Запуск локально
+
+Требуется Python 3.10+.
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # Windows: copy .env.example .env
+python manage.py migrate
+python manage.py test
+python manage.py runserver
+```
+
+По умолчанию используется SQLite, чтобы приложение запускалось без отдельного сервера БД. Для PostgreSQL задайте `DB_ENGINE=postgresql` и параметры подключения из `.env.example`.
+
+## Рыночные данные
+
+Для автоматического получения цен укажите `TINKOFF_TOKEN`. При настроенном токене Celery-задача `dashboard.tasks.update_last_price` получает последнюю цену, сохраняет точку в `PriceHistory` и проверяет ценовые условия. Для фонового выполнения запустите Redis, Celery worker и Celery beat:
+
+```bash
 celery -A config worker -l info
+celery -A config beat -l info
+```
 
-# Celery Worker для Windows (Eventlet)
-pip install eventlet cryptography
-celery -A config worker -l info -P eventlet
+Без токена приложение остаётся работоспособным в демо-режиме: можно добавлять наблюдения цен вручную на странице истории инструмента.
 
-# API
-# /api/v1/shares — работа с акциями
+## Тесты
+
+```bash
+python manage.py test
+```
+
+Тесты покрывают список акций и API, приватность списков наблюдения, защиту от повторных уведомлений, среднюю цену покупки, проверку продажи сверх остатка и историю цен.
+
+## Конфигурация
+
+Скопируйте `.env.example` в `.env` и задайте секретный ключ, разрешённые хосты и при необходимости токен провайдера. Не коммитьте реальные секреты.

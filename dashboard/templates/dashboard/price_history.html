@@ -1,0 +1,18 @@
+{% extends "dashboard/base.html" %}
+{% block title %}<title>История {{ share.ticker }}</title>{% endblock %}
+{% block content %}
+<h3>История цен: {{ share.ticker }}</h3>
+<p>
+  <a href="?days=7">7д</a> | <a href="?days=30">30д</a> | <a href="?days=90">90д</a>
+</p>
+{% if analysis %}
+<ul>
+  <li>Точек: {{ analysis.points }}</li>
+  <li>Min / Max / Avg: {{ analysis.min|floatformat:2 }} / {{ analysis.max|floatformat:2 }} / {{ analysis.avg|floatformat:2 }}</li>
+  <li>Изменение: {{ analysis.abs_change|floatformat:2 }} ({{ analysis.pct_change|floatformat:2 }}%)</li>
+</ul>
+{% else %}
+<p class="text-muted">Нет накопленных данных. Нажмите «Обновить цены» на главной.</p>
+{% endif %}
+{% autoescape off %}{{ plot_div }}{% endautoescape %}
+{% endblock %}

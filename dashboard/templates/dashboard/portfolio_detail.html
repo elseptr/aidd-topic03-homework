@@ -1,0 +1,45 @@
+{% extends "dashboard/base.html" %}
+{% block title %}<title>{{ portfolio.name }}</title>{% endblock %}
+{% block content %}
+<h2>{{ portfolio.name }}</h2>
+<p>Кэш: {{ summary.cash|floatformat:2 }} · Стоимость позиций: {{ summary.positions_value|floatformat:2 }} ·
+   Итого: <b>{{ summary.total_value|floatformat:2 }}</b> · P&L: {{ summary.total_pnl|floatformat:2 }}</p>
+
+<h4>Позиции</h4>
+<table class="table table-sm">
+  <tr><th>Тикер</th><th>Кол-во</th><th>Ср. цена</th><th>Тек. стоимость</th><th>P&L</th><th>%</th></tr>
+  {% for pos in summary.positions %}
+  <tr>
+    <td>{{ pos.share.ticker }}</td>
+    <td>{{ pos.quantity }}</td>
+    <td>{{ pos.avg_price|floatformat:2 }}</td>
+    <td>{{ pos.current_value|floatformat:2 }}</td>
+    <td>{{ pos.pnl|floatformat:2 }}</td>
+    <td>{{ pos.pnl_pct|floatformat:2 }}%</td>
+  </tr>
+  {% empty %}<tr><td colspan="6">Нет позиций</td></tr>{% endfor %}
+</table>
+
+<h4>Сделка</h4>
+<form method="post" action="{% url 'dashboard:portfolio_trade' portfolio.id %}" class="row g-2">
+  {% csrf_token %}
+  {{ trade_form.as_p }}
+  <button name="side" value="buy" class="btn btn-success">Купить</button>
+  <button name="side" value="sell" class="btn btn-danger">Продать</button>
+</form>
+
+<h4 class="mt-4">История операций</h4>
+<table class="table table-sm">
+  <tr><th>Время</th><th>Сторона</th><th>Тикер</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr>
+  {% for t in transactions %}
+  <tr>
+    <td>{{ t.created_at }}</td>
+    <td>{{ t.get_side_display }}</td>
+    <td>{{ t.share.ticker }}</td>
+    <td>{{ t.quantity }}</td>
+    <td>{{ t.price|floatformat:2 }}</td>
+    <td>{{ t.total|floatformat:2 }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

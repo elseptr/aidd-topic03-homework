@@ -1,64 +1,39 @@
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect, render
-from django.views.generic import View
-
-from .forms import AuthForm, RegistrationForm
-
-
-class AuthView(View):
-    """Авторизация"""
-
-    @staticmethod
-    def get(request):
-        return render(request, "user/auth.html", {"form": AuthForm})
-
-    @staticmethod
-    def post(request):
-        form = AuthForm(request.POST)
-        user = authenticate(
-            request, username=form.data["email"].lower(), password=form.data["password"]
-        )
-
-        if user is not None:
-            login(request, user)
-            return redirect("dashboard:index")
-        else:
-            return render(
-                request,
-                "user/auth.html",
-                {
-                    "form": form,
-                    "error": "Неверный логин или пароль! Повторите попытку.",
-                },
-            )
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 
-class RegistrationView(View):
-    """Регистрация"""
-
-    @staticmethod
-    def get(request):
-        return render(request, "user/registration.html", {"form": RegistrationForm})
-
-    @staticmethod
-    def post(request):
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect("dashboard:index")
-        else:
-            return render(
-                request,
-                "user/registration.html",
-                {"form": form, "error": form.errors["__all__"].data[0].message},
-            )
-
-
-class LogoutView(View):
-    """Выход"""
-
-    @staticmethod
-    def get(request):
-        logout(request)
+def auth_view(request):
+    if request.user.is_authenticated:
         return redirect("dashboard:index")
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect("dashboard:index")
+        messages.error(request, "Неверный логин или пароль")
+    return render(request, "user/auth.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("dashboard:index")
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard:index")
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Пользователь уже существует")
+        else:
+            user = User.objects.create_user(username=username, email=email, password=password)
+            login(request, user)
+            return redirect("dashboard:index")
+    return render(request, "user/register.html")

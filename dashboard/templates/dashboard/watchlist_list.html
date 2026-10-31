@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% block title %}<title>Watchlists</title>{% endblock %}
+{% block content %}
+<h2>Персональные списки наблюдения</h2>
+<a href="{% url 'dashboard:watchlist_create' %}" class="btn btn-success btn-sm mb-3">Новый список</a>
+{% if alerts %}
+<div class="alert alert-warning">
+  <h5>Уведомления <a href="{% url 'dashboard:mark_alerts_read' %}" class="btn btn-sm btn-outline-secondary">Прочитать все</a></h5>
+  <ul>{% for a in alerts %}<li>{{ a.message }} ({{ a.created_at }})</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% for wl in watchlists %}
+<div class="card mb-3">
+  <div class="card-header">{{ wl.name }}
+    <a href="{% url 'dashboard:watchlist_item_add' wl.id %}" class="btn btn-sm btn-primary float-end">+ акция</a>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for item in wl.items.all %}
+    <li class="list-group-item d-flex justify-content-between">
+      <span>{{ item.share.ticker }} — цель {{ item.target_price }} ({{ item.get_direction_display }})
+        {% if item.is_active %}<span class="badge bg-success">active</span>{% else %}<span class="badge bg-secondary">off</span>{% endif %}
+      </span>
+      <a href="{% url 'dashboard:watchlist_item_delete' item.id %}" class="btn btn-sm btn-outline-danger">×</a>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Пусто</li>
+    {% endfor %}
+  </ul>
+</div>
+{% empty %}
+<p>Нет списков</p>
+{% endfor %}
+{% endblock %}
