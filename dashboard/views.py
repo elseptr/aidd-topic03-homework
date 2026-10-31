@@ -26,9 +26,8 @@ class IsUserAuthenticatedMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_authenticated
 
-    @staticmethod
-    def handle_no_permission():
-        return redirect("dashboard:index")
+    def handle_no_permission(self):
+        return redirect("user:auth")
 
 
 class ShareListView(ListView):

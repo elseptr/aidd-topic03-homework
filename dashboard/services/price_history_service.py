@@ -40,8 +40,8 @@ class PriceHistoryService:
     def fetch_and_save_history(share, days=180, use_demo_fallback=True):
         """Загрузить историю цен и сохранить в БД."""
         try:
-            from tinkoff.invest import CandleInterval, Client
-            from tinkoff.invest.utils import now
+            from t_tech.invest import CandleInterval, Client
+            from t_tech.invest.utils import now
             from config.settings import TINKOFF_TOKEN
 
             candles = []
