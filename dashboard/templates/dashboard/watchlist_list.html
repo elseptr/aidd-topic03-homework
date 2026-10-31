@@ -1,0 +1,40 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    <title>Списки наблюдения</title>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Мои списки наблюдения</h2>
+        <a href="{% url 'dashboard:watchlist_create' %}" class="btn btn-primary">Создать список</a>
+    </div>
+
+    {% if watchlists %}
+        <div class="row">
+            {% for watchlist in watchlists %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">{{ watchlist.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Акций в списке: <strong>{{ watchlist.items.count }}</strong>
+                            </p>
+                            <a href="{% url 'dashboard:watchlist_detail' watchlist.id %}" class="btn btn-outline-primary">Открыть</a>
+                            <a href="{% url 'dashboard:watchlist_delete' watchlist.id %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            Создан: {{ watchlist.created_at|date:"d.m.Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            У вас пока нет списков наблюдения. Создайте первый список, чтобы отслеживать интересующие акции.
+        </div>
+    {% endif %}
+{% endblock %}

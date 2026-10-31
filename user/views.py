@@ -15,9 +15,14 @@ class AuthView(View):
     @staticmethod
     def post(request):
         form = AuthForm(request.POST)
-        user = authenticate(
-            request, username=form.data["email"].lower(), password=form.data["password"]
-        )
+        if form.is_valid():
+            user = authenticate(
+                request,
+                username=form.cleaned_data["email"].lower(),
+                password=form.cleaned_data["password"],
+            )
+        else:
+            user = None
 
         if user is not None:
             login(request, user)
@@ -48,10 +53,16 @@ class RegistrationView(View):
             login(request, user)
             return redirect("dashboard:index")
         else:
+            all_errors = form.errors.get("__all__")
+            error_message = (
+                all_errors.data[0].message
+                if all_errors and all_errors.data
+                else "Произошла ошибка при регистрации."
+            )
             return render(
                 request,
                 "user/registration.html",
-                {"form": form, "error": form.errors["__all__"].data[0].message},
+                {"form": form, "error": error_message},
             )
 
 

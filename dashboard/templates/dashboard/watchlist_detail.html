@@ -1,0 +1,71 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    <title>{{ watchlist.name }}</title>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ watchlist.name }}</h2>
+        <div>
+            <a href="{% url 'dashboard:watchlist_list' %}" class="btn btn-outline-secondary">Назад к спискам</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Добавить акцию</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'dashboard:watchlist_add_share' watchlist.id %}">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <input type="text" name="share_figi" class="form-control" placeholder="FIGI акции (например, BBG000B9XRY4)">
+                    <button class="btn btn-primary" type="submit">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if items %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Тикер</th>
+                <th scope="col">Название</th>
+                <th scope="col">ISIN</th>
+                <th scope="col">Текущая цена</th>
+                <th scope="col">Валюта</th>
+                <th scope="col">Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item.share.ticker }}</td>
+                    <td>{{ item.share.name }}</td>
+                    <td>{{ item.share.isin }}</td>
+                    <td>
+                        {% if item.share.last_price %}
+                            {{ item.share.last_price }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.share.currency }}</td>
+                    <td>
+                        <form method="post" action="{% url 'dashboard:watchlist_remove_share' watchlist.id item.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm" type="submit">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            В этом списке пока нет акций. Добавьте первую акцию, указав её FIGI.
+        </div>
+    {% endif %}
+{% endblock %}

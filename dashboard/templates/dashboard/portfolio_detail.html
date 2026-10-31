@@ -1,0 +1,157 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    <title>{{ portfolio.name }}</title>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{{ portfolio.name }}</h2>
+        <div>
+            <a href="{% url 'dashboard:portfolio_list' %}" class="btn btn-outline-secondary">Назад к портфелям</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Начальный баланс</h5>
+                    <p class="card-text display-4">{{ summary.initial_balance }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Общая стоимость</h5>
+                    <p class="card-text display-4">{{ summary.total_value }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-{% if summary.total_profit_loss >= 0 %}success{% else %}danger{% endif %} text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Прибыль/Убыток</h5>
+                    <p class="card-text display-4">{{ summary.total_profit_loss }} ({{ summary.total_profit_loss_percent }}%)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Купить акцию</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'dashboard:portfolio_buy' portfolio.id %}">
+                {% csrf_token %}
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" name="share_figi" class="form-control" placeholder="FIGI акции">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="quantity" class="form-control" placeholder="Количество" step="0.0000000001">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="price" class="form-control" placeholder="Цена" step="0.01">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" type="submit">Купить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Продать акцию</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'dashboard:portfolio_sell' portfolio.id %}">
+                {% csrf_token %}
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" name="share_figi" class="form-control" placeholder="FIGI акции">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="quantity" class="form-control" placeholder="Количество" step="0.0000000001">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="price" class="form-control" placeholder="Цена" step="0.01">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-danger w-100" type="submit">Продать</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if summary.positions %}
+        <h3>Позиции</h3>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Тикер</th>
+                <th scope="col">Количество</th>
+                <th scope="col">Средняя цена</th>
+                <th scope="col">Текущая цена</th>
+                <th scope="col">Текущая стоимость</th>
+                <th scope="col">Прибыль/Убыток</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for position in summary.positions %}
+                <tr>
+                    <td>{{ position.share.ticker }}</td>
+                    <td>{{ position.quantity }}</td>
+                    <td>{{ position.average_price }}</td>
+                    <td>{{ position.current_price|default:"—" }}</td>
+                    <td>{{ position.current_value }}</td>
+                    <td class="{% if position.profit_loss >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ position.profit_loss }} ({{ position.profit_loss_percent }}%)
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            В портфеле пока нет позиций. Купите первые акции.
+        </div>
+    {% endif %}
+
+    <h3>История операций</h3>
+    {% if portfolio.transactions.all %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Тип</th>
+                <th scope="col">Акция</th>
+                <th scope="col">Количество</th>
+                <th scope="col">Цена</th>
+                <th scope="col">Сумма</th>
+                <th scope="col">Время</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tx in portfolio.transactions.all %}
+                <tr>
+                    <td>{{ tx.get_transaction_type_display }}</td>
+                    <td>{{ tx.share.ticker }}</td>
+                    <td>{{ tx.quantity }}</td>
+                    <td>{{ tx.price }}</td>
+                    <td>{{ tx.total_amount }}</td>
+                    <td>{{ tx.executed_at|date:"d.m.Y H:i" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info mt-3">
+            История операций пуста.
+        </div>
+    {% endif %}
+{% endblock %}

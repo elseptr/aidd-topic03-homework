@@ -1,0 +1,57 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    <title>Ценовые уведомления</title>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ценовые уведомления</h2>
+        <a href="{% url 'dashboard:price_alert_create' %}" class="btn btn-primary">Создать уведомление</a>
+    </div>
+
+    {% if alerts %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Акция</th>
+                <th scope="col">Целевая цена</th>
+                <th scope="col">Тип</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Последнее срабатывание</th>
+                <th scope="col">Действие</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for alert in alerts %}
+                <tr>
+                    <td>{{ alert.share.ticker }}</td>
+                    <td>{{ alert.target_price }} {{ alert.share.currency }}</td>
+                    <td>{{ alert.get_alert_type_display }}</td>
+                    <td>
+                        {% if alert.is_active %}
+                            <span class="badge bg-success">Активно</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Неактивно</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if alert.last_triggered_at %}
+                            {{ alert.last_triggered_at|date:"d.m.Y H:i" }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'dashboard:price_alert_delete' alert.id %}" class="btn btn-danger btn-sm">Удалить</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">
+            У вас нет ценовых уведомлений. Создайте первое уведомление, чтобы получать оповещения о достижении целевой цены.
+        </div>
+    {% endif %}
+{% endblock %}

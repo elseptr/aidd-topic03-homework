@@ -23,7 +23,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
 
-
 </head>
 <body class="d-flex flex-column h-100">
 
@@ -31,6 +30,12 @@
     <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
         <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
             <li><a href="{% url 'dashboard:index' %}" class="nav-link px-2 link-secondary">Главная</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'dashboard:watchlist_list' %}" class="nav-link px-2 link-secondary">Списки наблюдения</a></li>
+                <li><a href="{% url 'dashboard:price_alert_list' %}" class="nav-link px-2 link-secondary">Уведомления о цене</a></li>
+                <li><a href="{% url 'dashboard:notification_list' %}" class="nav-link px-2 link-secondary">Уведомления</a></li>
+                <li><a href="{% url 'dashboard:portfolio_list' %}" class="nav-link px-2 link-secondary">Портфели</a></li>
+            {% endif %}
         </ul>
 
         <div class="col-md-3 text-end">

@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    <title>Уведомления</title>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Уведомления</h2>
+        {% if notifications %}
+            <form method="post" action="{% url 'dashboard:notification_mark_all_read' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-primary" type="submit">Отметить все прочитанными</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+        <div class="list-group">
+            {% for notification in notifications %}
+                <div class="list-group-item {% if not notification.is_read %}list-group-item-primary{% endif %}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ notification.message|truncatechars:100 }}</h5>
+                        <small>{{ notification.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    {% if not notification.is_read %}
+                        <form method="post" action="{% url 'dashboard:notification_mark_read' notification.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-outline-primary btn-sm" type="submit">Прочитано</button>
+                        </form>
+                    {% else %}
+                        <span class="badge bg-success">Прочитано</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            У вас нет уведомлений.
+        </div>
+    {% endif %}
+{% endblock %}
